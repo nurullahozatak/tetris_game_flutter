@@ -1,5 +1,5 @@
-int rowLenght = 10;
-int columnLenght = 15;
+int rowLength = 10;
+int columnLength = 15;
 
 enum Direction { right, left, down }
 
