@@ -32,7 +32,7 @@ class _GameBoardState extends State<GameBoard> {
     currentPiece.intializePiece();
 
     //frame refresh rate
-    Duration frameRate = const Duration(milliseconds: 800);
+    Duration frameRate = const Duration(milliseconds: 200);
     gameLoop(frameRate);
   }
 
@@ -150,6 +150,33 @@ class _GameBoardState extends State<GameBoard> {
     currentPiece.intializePiece();
   }
 
+  //move left
+  void moveLeft() {
+    //to make sure before moving the piece check if there is a collision
+    if (!checkCollision(Direction.left)) {
+      setState(() {
+        currentPiece.movePiece(Direction.left);
+      });
+    }
+  }
+
+  //move right
+  void moveRight() {
+    //to make sure before moving the piece check if there is a collision
+    if (!checkCollision(Direction.right)) {
+      setState(() {
+        currentPiece.movePiece(Direction.right);
+      });
+    }
+  }
+
+  //rotate piece
+  void rotatePiece() {
+    setState(() {
+      currentPiece.rotatePiece();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,40 +185,74 @@ class _GameBoardState extends State<GameBoard> {
           backgroundColor: Color.fromARGB(255, 57, 53, 74),
           centerTitle: true,
           title: Text("Tetris")),
-      body: GridView.builder(
-          itemCount: columnLength * rowLength,
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: rowLength),
-          itemBuilder: (context, index) {
-            //get row and col of each index
-            int row = (index / rowLength).floor();
-            int col = (index % rowLength);
+      body: Column(
+        children: [
+          Expanded(
+            //GAME SCREEN
+            child: GridView.builder(
+                itemCount: columnLength * rowLength,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: rowLength),
+                itemBuilder: (context, index) {
+                  //get row and col of each index
+                  int row = (index / rowLength).floor();
+                  int col = (index % rowLength);
 
-            //cutrrent piece
-            if (currentPiece.position.contains(index)) {
-              return Pixel(
-                color: Color.fromARGB(255, 106, 255, 0),
-                child: index,
-              );
-            }
+                  //cutrrent piece
+                  if (currentPiece.position.contains(index)) {
+                    return Pixel(
+                      color: Color.fromARGB(255, 106, 255, 0),
+                      child: index,
+                    );
+                  }
 
-            //landed piece
-            else if (gameBoard[row][col] != null) {
-              return Pixel(
-                color: Color.fromARGB(255, 191, 1, 1),
-                child: '',
-              );
-            }
+                  //landed piece
+                  else if (gameBoard[row][col] != null) {
+                    final Tetromino? tetrominoType = gameBoard[row][col];
+                    return Pixel(
+                      color: tetrominoColors[tetrominoType]!,
+                      child: '',
+                    );
+                  }
 
-            //blank pixel
-            else {
-              return Pixel(
-                color: const Color.fromARGB(255, 83, 83, 83),
-                child: index,
-              );
-            }
-          }),
+                  //blank pixel
+                  else {
+                    return Pixel(
+                      color: const Color.fromARGB(255, 83, 83, 83),
+                      child: index,
+                    );
+                  }
+                }),
+          ),
+
+          //GAME CONTROLS
+          Padding(
+            padding: const EdgeInsets.only(bottom: 50),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //left
+                IconButton(
+                  onPressed: moveLeft,
+                  icon: Icon(Icons.arrow_back_ios_new_outlined),
+                  color: Colors.white,
+                ),
+                //rotate
+                IconButton(
+                    onPressed: rotatePiece,
+                    icon: Icon(Icons.rotate_right),
+                    color: Colors.white),
+                //right
+                IconButton(
+                    onPressed: moveRight,
+                    icon: Icon(Icons.arrow_forward_ios_outlined),
+                    color: Colors.white),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
