@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 int rowLength = 10;
 int columnLength = 15;
+int currentScore = 0;
 
 enum Direction { right, left, down }
 

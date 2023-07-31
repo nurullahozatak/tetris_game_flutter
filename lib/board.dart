@@ -21,6 +21,9 @@ class _GameBoardState extends State<GameBoard> {
   //current tetris piece
   Piece currentPiece = Piece(type: Tetromino.L);
 
+  //game over status
+  bool gameOver = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,9 +44,50 @@ class _GameBoardState extends State<GameBoard> {
       setState(() {
         checkLanding();
 
+        //check if game over
+        if (gameOver == true) {
+          timer.cancel();
+          showGameOverDialog();
+        }
+
         currentPiece.movePiece(Direction.down);
       });
     });
+  }
+
+  //game over message dialog
+  void showGameOverDialog() {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("Game Over"),
+              content: Text("Score: $currentPiece.score"),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      resetGame();
+                      Navigator.pop(context);
+                    },
+                    child: Text("Play Again"))
+              ],
+            ));
+  }
+
+  //reset Game
+  void resetGame() {
+    //clear the game board
+    gameBoard = List.generate(
+        columnLength, (i) => List.generate(rowLength, (j) => null));
+
+    // new game
+    gameOver = false;
+    currentScore = 0;
+
+    //create new piece
+    createNewPiece();
+
+    //start game
+    startGame();
   }
 
   //check for collision
@@ -122,7 +166,21 @@ class _GameBoardState extends State<GameBoard> {
         // check for additional completed lines
         row++;
       }
+      currentScore++;
     }
+  }
+
+  //GAME OVER MESSAGE
+  bool isGameOver() {
+    //check if any columns in the top row is fill
+    for (int col = 0; col < rowLength; col++) {
+      if (gameBoard[0][col] != null) {
+        return true;
+      }
+    }
+
+    // if the top row is empty return false
+    return false;
   }
 
   bool checkLanded() {
@@ -148,6 +206,10 @@ class _GameBoardState extends State<GameBoard> {
         Tetromino.values[random.nextInt(Tetromino.values.length)];
     currentPiece = Piece(type: randomType);
     currentPiece.intializePiece();
+
+    if (isGameOver()) {
+      gameOver = true;
+    }
   }
 
   //move left
